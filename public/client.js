@@ -1,48 +1,58 @@
-// client-side js
-// run by the browser each time your view template is loaded
+$('#email').keyup(function () {
+  const email = $('#email')
+  if (email.val()) {
+    if (!validateEmail(email.val())) {
+      email.css({ 'color': '#f0506e', 'border-color': '#f0506e' })
+    } else {
+      email.css({ 'color': '#32d296', 'border-color': '#32d296' })
+    }
+  }
+})
 
-// by default, you've got jQuery,
-// add other scripts at the bottom of index.html
+var validateEmail = function (emailValue) {
+  var regex = /^\w+([-]?\w+)*@\w+([-]?\w+)*(\.\w{2,3})+$/
+  return regex.test(emailValue)
+}
 
 $('#username').keyup(function () {
-  let userfield = $('#username');
-  let profile = 'https://api.github.com/users/' + userfield.val();
-
-  fetch(profile)
-    .then((response) => {
-      response.json()
-        .then((data) => {
-          if (data.message) {
-            userfield.css({'color': '#f0506e', 'border-color': '#f0506e'});
-            $('#errorMsg').html('Username invalid.');
-          } else {
-            userfield.css({'color': '#32d296', 'border-color': '#32d296'});
-            $('#errorMsg').html(' ');
-          }
-        });
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-});
+  const username = $('#username')
+  if (username.val()) {
+    // https://aashutoshrathi.glitch.me/api/gh/ to increase API calls without 403.
+    const profile = 'https://aashutoshrathi.glitch.me/api/gh/' + username.val()
+    fetch(profile)
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          username.css({ color: '#f0506e', 'border-color': '#f0506e' })
+        } else {
+          username.css({ color: '#32d296', 'border-color': '#32d296' })
+        }
+      })
+      .catch(e => {
+        console.log(e)
+      })
+  } else {
+    username.css({ 'color': '#32d296', 'border-color': '#32d296' })
+  }
+})
 
 window.getStatus = function (url) {
-  var request = new XMLHttpRequest();
+  const request = new XMLHttpRequest()
   request.onreadystatechange = function () {
     if (request.readyState === 2) {
-      return request.status;
+      return request.status
       // this contains the status code
     }
-  };
-  request.open('GET', url, true);
-  request.send();
-};
+  }
+  request.open('GET', url, true)
+  request.send()
+}
 
 $.put = function (url, data, callback, type) {
   if ($.isFunction(data)) {
-    type = type || callback;
-    callback = data;
-    data = {};
+    type = type || callback
+    callback = data
+    data = {}
   }
 
   return $.ajax({
@@ -51,68 +61,71 @@ $.put = function (url, data, callback, type) {
     success: callback,
     data: data,
     contentType: type
-  });
-};
+  })
+}
 
 $(function () {
   $('form').submit(function (event) {
-    event.preventDefault();
-    var username = $('#username').val();
-    var email = $('#email').val();
-    console.log(username);
+    event.preventDefault()
+    const username = $('#username').val()
+    const email = $('#email').val()
+    console.log(username)
     fetch(`/sendmail/${username}/${email}`)
       .then((res) => {
-        console.log(res);
+        console.log(res)
         if (res.status === 200) {
+          // eslint-disable-next-line
           UIkit.notification({
-            message: '<span uk-icon=\'icon: thumbs-up\'></span> A verification E-mail has been sent.',
+            message: '<span class=\'uk-text-small\' uk-icon=\'icon: thumbs-up\'>A verification E-mail has been sent.</span>',
             status: 'success',
             pos: 'top-center',
             timeout: 2000
-          });
+          })
         }
       })
       .catch((e) => {
+        console.error(e)
+        // eslint-disable-next-line
         UIkit.notification({
-          message: '<span uk-icon=\'icon: warning\'></span> An error occured. Please try again later.',
+          message: '<span class=\'uk-text-small\' uk-icon=\'icon: warning\'>An error occured. Please try again later.</span>',
           status: 'danger',
           pos: 'top-center',
           timeout: 1000
-        });
-      });
-  });
-});
+        })
+      })
+  })
+})
 
 window.showToast = function () {
-  var username = $('#username').val();
-  var email = $('#email').val();
+  const username = $('#username').val()
+  const email = $('#email').val()
   if (username === '' && email === '') {
+    // eslint-disable-next-line
     UIkit.notification({
-      message: '<span uk-icon=\'icon: warning\'></span> email and github username are required fields.',
+      message: '<span uk-icon=\'icon: warning\'></span> <span class=\'uk-text-small\'>Email and Username are required fields</span>',
       status: 'danger',
       pos: 'top-center',
-      timeout: 1000
-    });
-  } else if (email === '') {
+      timeout: 2000
+    })
+  } else if (email === '' || username === '') {
+    var empty = 'Email'
+    if (username.length === 0) {
+      empty = 'Username'
+    }
+    // eslint-disable-next-line
     UIkit.notification({
-      message: '<span uk-icon=\'icon: warning\'></span> email is a required field.',
+      message: `<span uk-icon='icon: warning'></span> <span class='uk-text-small'>${empty} is required field.</span>`,
       status: 'danger',
       pos: 'top-center',
-      timeout: 1000
-    });
-  } else if (username === '') {
-    UIkit.notification({
-      message: '<span uk-icon=\'icon: warning\'></span> username is a required field.',
-      status: 'danger',
-      pos: 'top-center',
-      timeout: 1000
-    });
+      timeout: 1500
+    })
   } else {
+    // eslint-disable-next-line
     UIkit.notification({
-      message: '<div uk-spinner></div> Processing your request.',
+      message: '<div uk-spinner></div> <span class=\'uk-text-small\'>Processing your request.</span>',
       status: 'success',
       pos: 'bottom-center',
       timeout: 2000
-    });
+    })
   }
-};
+}
